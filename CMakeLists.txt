@@ -9,14 +9,14 @@ list(APPEND CMAKE_PREFIX_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/install/")
 
 project(pymp)
-option(PYMP_ENABLE_CUDA "Enable CUDA support" ON)
 
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(nanobind CONFIG REQUIRED)
 find_package(mathprim REQUIRED)
 
 file(GLOB_RECURSE PYMP_SRC "src/*.cpp")
-if(PYMP_ENABLE_CUDA)
+
+if(MATHPRIM_ENABLE_CUDA)
     file(GLOB_RECURSE PYMP_CU "src/*.cu")
     list(APPEND PYMP_SRC ${PYMP_CU})
 

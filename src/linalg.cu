@@ -17,11 +17,11 @@ template <typename Flt,
           typename Precond =
               sparse::iterative::none_preconditioner<Flt, device::cuda>>
 std::pair<index_t, double>
-cg_cuda(const Eigen::SparseMatrix<Flt, Eigen::RowMajor> &A,               //
-        nb::ndarray<Flt, nb::shape<-1>, nb::device::cpu, nb::c_contig> b, //
-        nb::ndarray<Flt, nb::shape<-1>, nb::device::cpu, nb::c_contig> x, //
-        const Flt atol,                                                   //
-        index_t max_iter,                                                 //
+cg_cuda(const Eigen::SparseMatrix<Flt, Eigen::RowMajor> &A, //
+        nb::ndarray<Flt, nb::shape<-1>, nb::device::cpu> b, //
+        nb::ndarray<Flt, nb::shape<-1>, nb::device::cpu> x, //
+        const Flt atol,                                     //
+        index_t max_iter,                                   //
         int verbose) {
   using SparseBlas =
       mp::sparse::blas::cusparse<Flt, sparse::sparse_format::csr>;
