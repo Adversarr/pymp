@@ -10,7 +10,7 @@ bool is_cuda_available() {
 #endif
 }
 
-PYBIND11_MODULE(libpymp, m) {
+NB_MODULE(libpymp, m) {
   ////////// Basic //////////
   m.doc() = "MathPrim: A lightweight tensor(view) library";
   auto checking = m.def_submodule("checking", "Checking module (internal debug use).");

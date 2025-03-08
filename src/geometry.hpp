@@ -1,4 +1,4 @@
 #pragma once
 #include "common.hpp"
 
-void bind_geometry(pybind11::module_& m);
+void bind_geometry(nb::module_& m);

@@ -17,11 +17,11 @@ template <typename Flt,
           typename Precond =
               sparse::iterative::none_preconditioner<Flt, device::cuda>>
 std::pair<index_t, double>
-cg_cuda(const Eigen::SparseMatrix<Flt, Eigen::RowMajor> &A,            //
-        py::array_t<Flt, py::array::c_style | py::array::forcecast> b, //
-        py::array_t<Flt, py::array::c_style | py::array::forcecast> x, //
-        const Flt atol,                                                //
-        index_t max_iter,                                              //
+cg_cuda(const Eigen::SparseMatrix<Flt, Eigen::RowMajor> &A,               //
+        nb::ndarray<Flt, nb::shape<-1>, nb::device::cpu, nb::c_contig> b, //
+        nb::ndarray<Flt, nb::shape<-1>, nb::device::cpu, nb::c_contig> x, //
+        const Flt atol,                                                   //
+        index_t max_iter,                                                 //
         int verbose) {
   using SparseBlas =
       mp::sparse::blas::cusparse<Flt, sparse::sparse_format::csr>;
@@ -40,7 +40,7 @@ cg_cuda(const Eigen::SparseMatrix<Flt, Eigen::RowMajor> &A,            //
   }
 
   auto h_b_view = view(b.data(), make_shape(b.size()));
-  auto h_x_view = view(x.mutable_data(), make_shape(x.size()));
+  auto h_x_view = view(x.data(), make_shape(x.size()));
   if (max_iter == 0) {
     max_iter = A.rows();
   }
@@ -97,60 +97,60 @@ using ic =
     sparse::iterative::cusparse_ichol<Scalar, device::cuda,
                                       mathprim::sparse::sparse_format::csr>;
 
-void bind_linalg_cuda(py::module_ &m) {
+void bind_linalg_cuda(nb::module_ &m) {
   m.def("cg_cuda", &cg_cuda<float>,
         "Preconditioned Conjugate Gradient method (CUDA).", //
-        py::arg("A"),                                       //
-        py::arg("b").noconvert(), py::arg("x").noconvert(), //
-        py::arg("atol") = 1e-4f, py::arg("max_iter") = 0,
-        py::arg("verbose") = 0);
+        nb::arg("A"),                                       //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
+        nb::arg("atol") = 1e-4f, nb::arg("max_iter") = 0,
+        nb::arg("verbose") = 0);
 
   m.def("pcg_diagonal_cuda", &cg_cuda<float, diagonal<float>>,
         "Preconditioned Conjugate Gradient method on GPU. (Diagonal "
         "Preconditioner)",                                  //
-        py::arg("A"),                                       //
-        py::arg("b").noconvert(), py::arg("x").noconvert(), //
-        py::arg("rtol") = 1e-4f, py::arg("max_iter") = 0,
-        py::arg("verbose") = 0);
+        nb::arg("A"),                                       //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
+        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
+        nb::arg("verbose") = 0);
   m.def("pcg_ainv_cuda", &cg_cuda<float, ainv<float>>,
         "Preconditioned Conjugate Gradient method on GPU. (Approx Inverse "
         "Preconditioner)",                                  //
-        py::arg("A"),                                       //
-        py::arg("b").noconvert(), py::arg("x").noconvert(), //
-        py::arg("rtol") = 1e-4f, py::arg("max_iter") = 0,
-        py::arg("verbose") = 0);
+        nb::arg("A"),                                       //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
+        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
+        nb::arg("verbose") = 0);
   m.def("cg_cuda", &cg_cuda<double>,
         "Preconditioned Conjugate Gradient method (CUDA).", //
-        py::arg("A"),                                       //
-        py::arg("b").noconvert(), py::arg("x").noconvert(), //
-        py::arg("atol") = 1e-4f, py::arg("max_iter") = 0,
-        py::arg("verbose") = 0);
+        nb::arg("A"),                                       //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
+        nb::arg("atol") = 1e-4f, nb::arg("max_iter") = 0,
+        nb::arg("verbose") = 0);
   m.def("pcg_ic", &cg_cuda<float, ic<float>>,
         "Preconditioned Conjugate Gradient method on GPU. (Incomplete Cholesky "
         "Preconditioner)",                                  //
-        py::arg("A"),                                       //
-        py::arg("b").noconvert(), py::arg("x").noconvert(), //
-        py::arg("rtol") = 1e-4f, py::arg("max_iter") = 0,
-        py::arg("verbose") = 0);
+        nb::arg("A"),                                       //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
+        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
+        nb::arg("verbose") = 0);
   m.def("pcg_diagonal_cuda", &cg_cuda<double, diagonal<double>>,
         "Preconditioned Conjugate Gradient method on GPU. (Diagonal "
         "Preconditioner)",                                  //
-        py::arg("A"),                                       //
-        py::arg("b").noconvert(), py::arg("x").noconvert(), //
-        py::arg("rtol") = 1e-4f, py::arg("max_iter") = 0,
-        py::arg("verbose") = 0);
+        nb::arg("A"),                                       //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
+        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
+        nb::arg("verbose") = 0);
   m.def("pcg_ainv_cuda", &cg_cuda<double, ainv<double>>,
         "Preconditioned Conjugate Gradient method on GPU. (Approx Inverse "
         "Preconditioner)",                                  //
-        py::arg("A"),                                       //
-        py::arg("b").noconvert(), py::arg("x").noconvert(), //
-        py::arg("rtol") = 1e-4f, py::arg("max_iter") = 0,
-        py::arg("verbose") = 0);
+        nb::arg("A"),                                       //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
+        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
+        nb::arg("verbose") = 0);
 //   m.def("pcg_ic", &cg_cuda<double, ic<double>>,
 //         "Preconditioned Conjugate Gradient method on GPU. (Incomplete Cholesky "
 //         "Preconditioner)",                                  //
-//         py::arg("A"),                                       //
-//         py::arg("b").noconvert(), py::arg("x").noconvert(), //
-//         py::arg("rtol") = 1e-4f, py::arg("max_iter") = 0,
-//         py::arg("verbose") = 0);
+//         nb::arg("A"),                                       //
+//         nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
+//         nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
+//         nb::arg("verbose") = 0);
 }

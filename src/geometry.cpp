@@ -1,6 +1,5 @@
 #include "geometry.hpp"
 
-
 #include <Eigen/Sparse>
 #include <iostream>
 
@@ -10,8 +9,8 @@
 
 template <typename Flt>
 Eigen::SparseMatrix<Flt, Eigen::RowMajor> laplacian(
-    py::array_t<Flt, py::array::c_style | py::array::forcecast> vertices,
-    py::array_t<int, py::array::c_style | py::array::forcecast> faces) {
+    nb::ndarray<Flt, nb::shape<-1, -1>, nb::device::cpu, nb::c_contig> vertices,
+    nb::ndarray<int, nb::shape<-1, -1>, nb::device::cpu, nb::c_contig> faces) {
   if (vertices.ndim() != 2) {
     throw std::runtime_error("vertices must be 2D array");
   }
@@ -26,21 +25,18 @@ Eigen::SparseMatrix<Flt, Eigen::RowMajor> laplacian(
 
   using namespace mp::literal;
   if (ndim == 2 && dsimplex == 3) {
-    mp::geometry::basic_mesh<Flt, 2, 3, mp::device::cpu> mesh{
-      mp::view(vertices.data(), mp::make_shape(nvert, 2_s)),
-      mp::view(faces.data(), mp::make_shape(nface, 3_s))};
+    mp::geometry::basic_mesh<Flt, 2, 3, mp::device::cpu> mesh{mp::view(vertices.data(), mp::make_shape(nvert, 2_s)),
+                                                              mp::view(faces.data(), mp::make_shape(nface, 3_s))};
     auto matrix = mp::geometry::build_laplacian<mathprim::sparse::sparse_format::csr, Flt>(mesh);
     return mp::eigen_support::map(matrix.view());
   } else if (ndim == 3 && dsimplex == 3) {
-    mp::geometry::basic_mesh<Flt, 3, 3, mp::device::cpu> mesh{
-      mp::view(vertices.data(), mp::make_shape(nvert, 3_s)),
-      mp::view(faces.data(), mp::make_shape(nface, 3_s))};
+    mp::geometry::basic_mesh<Flt, 3, 3, mp::device::cpu> mesh{mp::view(vertices.data(), mp::make_shape(nvert, 3_s)),
+                                                              mp::view(faces.data(), mp::make_shape(nface, 3_s))};
     auto matrix = mp::geometry::build_laplacian<mathprim::sparse::sparse_format::csr, Flt>(mesh);
     return mp::eigen_support::map(matrix.view());
   } else if (ndim == 3 && dsimplex == 4) {
-    mp::geometry::basic_mesh<Flt, 3, 4, mp::device::cpu> mesh{
-      mp::view(vertices.data(), mp::make_shape(nvert, 3_s)),
-      mp::view(faces.data(), mp::make_shape(nface, 4_s))};
+    mp::geometry::basic_mesh<Flt, 3, 4, mp::device::cpu> mesh{mp::view(vertices.data(), mp::make_shape(nvert, 3_s)),
+                                                              mp::view(faces.data(), mp::make_shape(nface, 4_s))};
     auto matrix = mp::geometry::build_laplacian<mathprim::sparse::sparse_format::csr, Flt>(mesh);
     return mp::eigen_support::map(matrix.view());
   } else {
@@ -49,12 +45,11 @@ Eigen::SparseMatrix<Flt, Eigen::RowMajor> laplacian(
     throw std::runtime_error(oss.str());
   }
 }
-
 
 template <typename Flt>
 Eigen::SparseMatrix<Flt, Eigen::RowMajor> lumped_mass(
-    py::array_t<Flt, py::array::c_style | py::array::forcecast> vertices,
-    py::array_t<int, py::array::c_style | py::array::forcecast> faces) {
+    nb::ndarray<Flt, nb::shape<-1, -1>, nb::device::cpu, nb::numpy> vertices,
+    nb::ndarray<int, nb::shape<-1, -1>, nb::device::cpu, nb::numpy> faces) {
   if (vertices.ndim() != 2) {
     throw std::runtime_error("vertices must be 2D array");
   }
@@ -69,21 +64,18 @@ Eigen::SparseMatrix<Flt, Eigen::RowMajor> lumped_mass(
 
   using namespace mp::literal;
   if (ndim == 2 && dsimplex == 3) {
-    mp::geometry::basic_mesh<Flt, 2, 3, mp::device::cpu> mesh{
-      mp::view(vertices.data(), mp::make_shape(nvert, 2_s)),
-      mp::view(faces.data(), mp::make_shape(nface, 3_s))};
+    mp::geometry::basic_mesh<Flt, 2, 3, mp::device::cpu> mesh{mp::view(vertices.data(), mp::make_shape(nvert, 2_s)),
+                                                              mp::view(faces.data(), mp::make_shape(nface, 3_s))};
     auto matrix = mp::geometry::build_lumped_mass<mathprim::sparse::sparse_format::csr, Flt>(mesh);
     return mp::eigen_support::map(matrix.view());
   } else if (ndim == 3 && dsimplex == 3) {
-    mp::geometry::basic_mesh<Flt, 3, 3, mp::device::cpu> mesh{
-      mp::view(vertices.data(), mp::make_shape(nvert, 3_s)),
-      mp::view(faces.data(), mp::make_shape(nface, 3_s))};
+    mp::geometry::basic_mesh<Flt, 3, 3, mp::device::cpu> mesh{mp::view(vertices.data(), mp::make_shape(nvert, 3_s)),
+                                                              mp::view(faces.data(), mp::make_shape(nface, 3_s))};
     auto matrix = mp::geometry::build_lumped_mass<mathprim::sparse::sparse_format::csr, Flt>(mesh);
     return mp::eigen_support::map(matrix.view());
   } else if (ndim == 3 && dsimplex == 4) {
-    mp::geometry::basic_mesh<Flt, 3, 4, mp::device::cpu> mesh{
-      mp::view(vertices.data(), mp::make_shape(nvert, 3_s)),
-      mp::view(faces.data(), mp::make_shape(nface, 4_s))};
+    mp::geometry::basic_mesh<Flt, 3, 4, mp::device::cpu> mesh{mp::view(vertices.data(), mp::make_shape(nvert, 3_s)),
+                                                              mp::view(faces.data(), mp::make_shape(nface, 4_s))};
     auto matrix = mp::geometry::build_lumped_mass<mathprim::sparse::sparse_format::csr, Flt>(mesh);
     return mp::eigen_support::map(matrix.view());
   } else {
@@ -93,14 +85,14 @@ Eigen::SparseMatrix<Flt, Eigen::RowMajor> lumped_mass(
   }
 }
 
-void bind_geometry(pybind11::module_& m) {
+void bind_geometry(nb::module_& m) {
   m                                        //
       .def("laplacian", laplacian<float>,  //
-           "Compute the Laplacian matrix of a mesh.", py::arg("vertices").noconvert(), py::arg("faces").noconvert())
+           "Compute the Laplacian matrix of a mesh.", nb::arg("vertices").noconvert(), nb::arg("faces").noconvert())
       .def("laplacian", laplacian<double>,  //
-           "Compute the Laplacian matrix of a mesh.", py::arg("vertices").noconvert(), py::arg("faces").noconvert())
+           "Compute the Laplacian matrix of a mesh.", nb::arg("vertices").noconvert(), nb::arg("faces").noconvert())
       .def("lumped_mass", lumped_mass<float>,  //
-           "Compute the Lumped-mass matrix of a mesh.", py::arg("vertices").noconvert(), py::arg("faces").noconvert())
+           "Compute the Lumped-mass matrix of a mesh.", nb::arg("vertices").noconvert(), nb::arg("faces").noconvert())
       .def("lumped_mass", lumped_mass<double>,  //
-           "Compute the Lumped-mass matrix of a mesh.", py::arg("vertices").noconvert(), py::arg("faces").noconvert());
+           "Compute the Lumped-mass matrix of a mesh.", nb::arg("vertices").noconvert(), nb::arg("faces").noconvert());
 }

@@ -1,17 +1,13 @@
 #include "checkings.hpp"
 
-
-#include <pybind11/eigen.h>
-#include <pybind11/numpy.h>
-
-void add_1(py::array_t<double, py::array::c_style | py::array::forcecast> arr) {
+void add_1(nb::ndarray<int, nb::shape<-1>, nb::device::cpu, nb::numpy> arr) {
   auto cnt = arr.size();
-  auto* ptr = arr.mutable_data();
+  auto* ptr = arr.data();
   for (ssize_t i = 0; i < cnt; ++i) {
     ptr[i] += 1;
   }
 }
 
-void bind_checkings(pybind11::module_& m) {
-  m.def("add_1", add_1, "Add 1 to each element of the input array.", py::arg("arr"));
+void bind_checkings(nb::module_& m) {
+  m.def("add_1", add_1, "Add 1 to each element of the input array.", nb::arg("arr"));
 }

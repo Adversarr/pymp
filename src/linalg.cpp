@@ -12,10 +12,10 @@ using namespace mathprim;
 
 template <typename Flt, typename Precond = sparse::iterative::none_preconditioner<Flt, device::cpu>>
 std::pair<index_t, double> cg_host(const Eigen::SparseMatrix<Flt, Eigen::RowMajor>& A,             //
-                                   py::array_t<Flt, py::array::c_style | py::array::forcecast> b,  //
-                                   py::array_t<Flt, py::array::c_style | py::array::forcecast> x,  //
-                                   const Flt rtol,                                                 //
-                                   index_t max_iter,                                               //
+                                   nb::ndarray<Flt, nb::ndim<1>, nb::device::cpu> b,  //
+                                   nb::ndarray<Flt, nb::ndim<1>, nb::device::cpu> x,  //
+                                   const Flt rtol,    //
+                                   index_t max_iter,  //
                                    int verbose) {
   using SparseBlas = mp::sparse::blas::eigen<Flt, sparse::sparse_format::csr>;
   using LinearOp = sparse::iterative::sparse_matrix<SparseBlas>;
@@ -31,7 +31,7 @@ std::pair<index_t, double> cg_host(const Eigen::SparseMatrix<Flt, Eigen::RowMajo
   }
 
   auto b_view = view(b.data(), make_shape(b.size()));
-  auto x_view = view(x.mutable_data(), make_shape(x.size()));
+  auto x_view = view(x.data(), make_shape(x.size()));
   if (max_iter == 0) {
     max_iter = A.rows();
   }
@@ -74,56 +74,56 @@ Eigen::SparseMatrix<Flt, Eigen::RowMajor> ainv_content(const Eigen::SparseMatrix
   return eigen_support::map(ainv.ainv());
 }
 
-void bind_linalg(py::module_& m) {
+void bind_linalg(nb::module_& m) {
   m.def("cg", &cg_host<float>, "Preconditioned Conjugate Gradient method on CPU.",  //
-        py::arg("A").noconvert(),                                                   //
-        py::arg("b").noconvert(), py::arg("x").noconvert(),                         //
-        py::arg("rtol") = 1e-4f, py::arg("max_iter") = 0, py::arg("verbose") = 0);
+        nb::arg("A").noconvert(),                                                   //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                         //
+        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
 
   m.def("pcg_diagonal", &cg_host<float, diagonal<float>>,
         "Preconditioned Conjugate Gradient method on CPU. (Diagonal Preconditioner)",  //
-        py::arg("A").noconvert(),                                                      //
-        py::arg("b").noconvert(), py::arg("x").noconvert(),                            //
-        py::arg("rtol") = 1e-4f, py::arg("max_iter") = 0, py::arg("verbose") = 0);
+        nb::arg("A").noconvert(),                                                      //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                            //
+        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
   m.def("pcg_ainv", &cg_host<float, ainv<float>>,
         "Preconditioned Conjugate Gradient method on CPU. (Approx Inverse Preconditioner)",  //
-        py::arg("A").noconvert(),                                                            //
-        py::arg("b").noconvert(), py::arg("x").noconvert(),                                  //
-        py::arg("rtol") = 1e-4f, py::arg("max_iter") = 0, py::arg("verbose") = 0);
+        nb::arg("A").noconvert(),                                                            //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                                  //
+        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
   m.def("pcg_ic", &cg_host<float, ic<float>>,
         "Preconditioned Conjugate Gradient method on CPU. (Incomplete Cholesky Preconditioner)",  //
-        py::arg("A").noconvert(),                                                                 //
-        py::arg("b").noconvert(), py::arg("x").noconvert(),                                       //
-        py::arg("rtol") = 1e-4f, py::arg("max_iter") = 0, py::arg("verbose") = 0);
+        nb::arg("A").noconvert(),                                                                 //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                                       //
+        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
 
   m.def("cg", &cg_host<double>, "Preconditioned Conjugate Gradient method on CPU.",  //
-        py::arg("A").noconvert(),                                                    //
-        py::arg("b").noconvert(), py::arg("x").noconvert(),                          //
-        py::arg("rtol") = 1e-4f, py::arg("max_iter") = 0, py::arg("verbose") = 0);
+        nb::arg("A").noconvert(),                                                    //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                          //
+        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
 
   m.def("pcg_diagonal", &cg_host<double, diagonal<double>>,
         "Preconditioned Conjugate Gradient method on CPU. (Diagonal Preconditioner)",  //
-        py::arg("A").noconvert(),                                                      //
-        py::arg("b").noconvert(), py::arg("x").noconvert(),                            //
-        py::arg("rtol") = 1e-4f, py::arg("max_iter") = 0, py::arg("verbose") = 0);
+        nb::arg("A").noconvert(),                                                      //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                            //
+        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
   m.def("pcg_ainv", &cg_host<double, ainv<double>>,
         "Preconditioned Conjugate Gradient method on CPU. (Approx Inverse Preconditioner)",  //
-        py::arg("A").noconvert(),                                                            //
-        py::arg("b").noconvert(), py::arg("x").noconvert(),                                  //
-        py::arg("rtol") = 1e-4f, py::arg("max_iter") = 0, py::arg("verbose") = 0);
+        nb::arg("A").noconvert(),                                                            //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                                  //
+        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
   m.def("pcg_ic", &cg_host<double, ic<double>>,
         "Preconditioned Conjugate Gradient method on CPU. (Incomplete Cholesky Preconditioner)",  //
-        py::arg("A").noconvert(),                                                                 //
-        py::arg("b").noconvert(), py::arg("x").noconvert(),                                       //
-        py::arg("rtol") = 1e-4f, py::arg("max_iter") = 0, py::arg("verbose") = 0);
+        nb::arg("A").noconvert(),                                                                 //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                                       //
+        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
 
   m.def("ainv_content", &ainv_content<float>, "Get the content of the Approx Inverse Preconditioner.",
-        py::arg("A").noconvert());
+        nb::arg("A").noconvert());
   m.def("ainv_content", &ainv_content<double>, "Get the content of the Approx Inverse Preconditioner.",
-        py::arg("A").noconvert());
+        nb::arg("A").noconvert());
 }
 #ifndef MATHPRIM_ENABLE_CUDA
-void bind_linalg_cuda(py::module_& m) {
+void bind_linalg_cuda(nb::module_& m) {
   // Do nothing
 }
 #endif

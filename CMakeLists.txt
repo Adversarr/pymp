@@ -12,7 +12,7 @@ project(pymp)
 option(PYMP_ENABLE_CUDA "Enable CUDA support" ON)
 
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
-find_package(pybind11 CONFIG REQUIRED)
+find_package(nanobind CONFIG REQUIRED)
 find_package(mathprim REQUIRED)
 
 file(GLOB_RECURSE PYMP_SRC "src/*.cpp")
@@ -32,7 +32,7 @@ if(PYMP_ENABLE_CUDA)
     enable_language(CUDA)
 endif()
 
-pybind11_add_module(libpymp ${PYMP_SRC})
+nanobind_add_module(libpymp ${PYMP_SRC})
 
 target_link_libraries(libpymp PRIVATE mathprim::mathprim)
 
