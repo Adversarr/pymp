@@ -6,8 +6,8 @@
 
 void add_1(py::array_t<double, py::array::c_style | py::array::forcecast> arr) {
   auto cnt = arr.size();
-  auto ptr = arr.mutable_data();
-  for (size_t i = 0; i < cnt; ++i) {
+  auto* ptr = arr.mutable_data();
+  for (ssize_t i = 0; i < cnt; ++i) {
     ptr[i] += 1;
   }
 }

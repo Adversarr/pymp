@@ -28,6 +28,7 @@ for method in [cg, cg_cuda, pcg_diagonal, pcg_ainv, pcg_diagonal_cuda, pcg_ainv_
     print(x)
     print(A @ x - b)
 
+print(ainv_content(A))
 
 def laplace_2d(n) -> csr_matrix:
     """

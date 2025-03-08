@@ -123,3 +123,14 @@ def pcg_ainv_cuda(
         The time taken to solve the linear system.
     """
     return libpymp.linalg.pcg_ainv_cuda(A, b, x, rtol, max_iter, verbose)
+
+def ainv_content(A: csr_matrix) -> csr_matrix:
+    """
+    Compute the content of the Approximated Inverse preconditioner.
+
+    Returns
+    -------
+    csr_matrix
+        The content of the Approximated Inverse preconditioner.
+    """
+    return libpymp.linalg.ainv_content(A)
