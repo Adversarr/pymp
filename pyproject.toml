@@ -1,0 +1,33 @@
+[project]
+name = "pymp"
+version = "0.1.0"
+description = "A lightweight tensor(view) library."
+authors = [
+    {name = "Adversarr",email = "1444781838@qq.com"}
+]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy (>=2.2.3,<3.0.0)",
+    "scipy (>=1.15.2,<2.0.0)",
+    "pybind11 (>=2.13.6,<3.0.0)",
+    "setuptools (>=75.8.2,<76.0.0)"
+]
+
+# [build-system]
+# requires = ["poetry-core>=2.0.0,<3.0.0"]
+# build-backend = "poetry.core.masonry.api"
+[build-system]
+requires = ["scikit-build-core >=0.10", "pybind11 >=2.13.6"]
+build-backend = "scikit_build_core.build"
+
+[tool.scikit-build]
+# Protect the configuration against future changes in scikit-build-core
+minimum-version = "build-system.requires"
+# Setuptools-style build caching in a local directory
+build-dir = "build"
+[tool.scikit-build.cmake]
+build-type = "RelWithDebInfo"
+define.CMAKE_EXPORT_COMPILE_COMMANDS = true
+
