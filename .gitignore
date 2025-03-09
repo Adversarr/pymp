@@ -2,6 +2,7 @@
 mathprim
 install
 _build
+poetry.lock
 
 
 # Byte-compiled / optimized / DLL files

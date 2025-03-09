@@ -2,6 +2,8 @@ from typing import Tuple, List, Union
 import libpymp
 import numpy as np
 from scipy.sparse import csr_matrix
+from torch import Tensor
+import torch
 
 
 def cg(
@@ -158,3 +160,155 @@ def grid_laplacian_nd_dbc(
         return libpymp.linalg.grid_laplacian_nd_dbc_float64(grids)
     else:
         raise ValueError("dtype must be np.float32 or np.float64")
+
+def cg_cuda_csr_direct(
+    outer_ptrs: Tensor,
+    inner_indices: Tensor,
+    values: Tensor,
+    rows: int,
+    cols: int,
+    b: Tensor,
+    x: Tensor,
+    rtol: float = 1e-4,
+    max_iter: int = 0,
+    verbose: int = 0,
+) -> Tuple[int, float]:
+    """
+    Solve the linear system Ax = b using the conjugate gradient method on GPU.
+    
+    Returns
+    -------
+    int
+        The number of iterations.
+    float
+        The time taken to solve the linear system.
+    """
+    assert outer_ptrs.dtype == inner_indices.dtype == torch.int32
+    assert values.dtype == b.dtype == x.dtype
+    assert b.is_contiguous() and x.is_contiguous()
+    return libpymp.linalg.cg_cuda_csr_direct(
+        outer_ptrs=outer_ptrs,
+        inner_indices=inner_indices,
+        values=values,
+        rows=rows,
+        cols=cols,
+        b=b,
+        x=x,
+        rtol=rtol,
+        max_iter=max_iter,
+        verbose=verbose,
+    )
+
+def pcg_cuda_csr_direct_diagonal(
+    outer_ptrs: Tensor,
+    inner_indices: Tensor,
+    values: Tensor,
+    rows: int,
+    cols: int,
+    b: Tensor,
+    x: Tensor,
+    rtol: float = 1e-4,
+    max_iter: int = 0,
+    verbose: int = 0,
+) -> Tuple[int, float]:
+    """
+    Solve the linear system Ax = b using the conjugate gradient method with diagonal preconditioner on GPU.
+    
+    Returns
+    -------
+    int
+        The number of iterations.
+    float
+        The time taken to solve the linear system.
+    """
+    assert outer_ptrs.dtype == inner_indices.dtype == torch.int32
+    assert values.dtype == b.dtype == x.dtype
+    assert b.is_contiguous() and x.is_contiguous()
+    return libpymp.linalg.pcg_cuda_csr_direct_diagonal(
+        outer_ptrs=outer_ptrs,
+        inner_indices=inner_indices,
+        values=values,
+        rows=rows,
+        cols=cols,
+        b=b,
+        x=x,
+        rtol=rtol,
+        max_iter=max_iter,
+        verbose=verbose,
+    )
+
+def pcg_cuda_csr_direct_ic(
+    outer_ptrs: Tensor,
+    inner_indices: Tensor,
+    values: Tensor,
+    rows: int,
+    cols: int,
+    b: Tensor,
+    x: Tensor,
+    rtol: float = 1e-4,
+    max_iter: int = 0,
+    verbose: int = 0,
+) -> Tuple[int, float]:
+    """
+    Solve the linear system Ax = b using the conjugate gradient method with Incomplete Cholesky preconditioner on GPU.
+    
+    Returns
+    -------
+    int
+        The number of iterations.
+    float
+        The time taken to solve the linear system.
+    """
+    assert outer_ptrs.dtype == inner_indices.dtype == torch.int32
+    assert values.dtype == b.dtype == x.dtype
+    assert b.is_contiguous() and x.is_contiguous()
+    return libpymp.linalg.pcg_cuda_csr_direct_ic(
+        outer_ptrs=outer_ptrs,
+        inner_indices=inner_indices,
+        values=values,
+        rows=rows,
+        cols=cols,
+        b=b,
+        x=x,
+        rtol=rtol,
+        max_iter=max_iter,
+        verbose=verbose,
+   )
+
+def pcg_cuda_csr_direct_ainv(
+    outer_ptrs: Tensor,
+    inner_indices: Tensor,
+    values: Tensor,
+    rows: int,
+    cols: int,
+    b: Tensor,
+    x: Tensor,
+    rtol: float = 1e-4,
+    max_iter: int = 0,
+    verbose: int = 0,
+) -> Tuple[int, float]:
+    """
+    Solve the linear system Ax = b using the conjugate gradient method with Approximated Inverse preconditioner on GPU.
+    
+    Returns
+    -------
+    int
+        The number of iterations.
+    float
+        The time taken to solve the linear system.
+    """
+    assert outer_ptrs.dtype == inner_indices.dtype == torch.int32
+    assert values.dtype == b.dtype == x.dtype
+    assert b.is_contiguous() and x.is_contiguous()
+    return libpymp.linalg.pcg_cuda_csr_direct_ainv(
+        outer_ptrs=outer_ptrs,
+        inner_indices=inner_indices,
+        values=values,
+        rows=rows,
+        cols=cols,
+        b=b,
+        x=x,
+        rtol=rtol,
+        max_iter=max_iter,
+        verbose=verbose,
+    )
