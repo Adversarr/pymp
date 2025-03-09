@@ -18,7 +18,20 @@ fi
 
 # If exists, remove mathprim and _build
 if [ -d "mathprim" ]; then
-    rm -rf mathprim
+    cd mathprim
+    echo -e "${INFO_COLOR}Pulling the latest version of mathprim to $(pwd)...${NO_COLOR}"
+    git pull &> /dev/null
+    if [ $? -ne 0 ]; then
+        echo -e "${WARNING_COLOR}Failed to pull the latest version of mathprim.${NO_COLOR}"
+        exit
+    fi
+    # show version
+    git log -1 --pretty=format:"%h %s"
+    echo -e "${INFO_COLOR}Git pull finished.${NO_COLOR}"
+    cd ..
+else
+    echo -e "${INFO_COLOR}Cloning mathprim...${NO_COLOR}"
+    git clone $MATHPRIM_GITLINK mathprim
 fi
 if [ -d "_build" ]; then
     rm -rf _build
@@ -37,7 +50,6 @@ else
     echo -e "${INFO_COLOR}nvcc not found. CUDA will be disabled.${NO_COLOR}"
 fi
 
-git clone $MATHPRIM_GITLINK mathprim
 cmake -S mathprim -B _build                     \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo           \
     -DCMAKE_INSTALL_PREFIX=$(pwd)/install       \

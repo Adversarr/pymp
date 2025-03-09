@@ -126,7 +126,7 @@ def pcg_ainv_cuda(
     """
     return libpymp.linalg.pcg_ainv_cuda(A, b, x, rtol, max_iter, verbose)
 
-def ainv_content(A: csr_matrix) -> csr_matrix:
+def ainv(A: csr_matrix) -> csr_matrix:
     """
     Compute the content of the Approximated Inverse preconditioner.
 

@@ -229,13 +229,13 @@ void bind_linalg_cuda(nb::module_ &m) {
         nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
         nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
         nb::arg("verbose") = 0);
-//   m.def("pcg_ic", &cg_cuda<double, ic<double>>,
-//         "Preconditioned Conjugate Gradient method on GPU. (Incomplete Cholesky "
-//         "Preconditioner)",                                  //
-//         nb::arg("A"),                                       //
-//         nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
-//         nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
-//         nb::arg("verbose") = 0);
+  m.def("pcg_ic", &cg_cuda<double, ic<double>>,
+        "Preconditioned Conjugate Gradient method on GPU. (Incomplete Cholesky "
+        "Preconditioner)",                                  //
+        nb::arg("A"),                                       //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
+        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
+        nb::arg("verbose") = 0);
 
   m.def("cg_cuda_csr_direct", &cg_cuda_csr_direct<float>,
         "Preconditioned Conjugate Gradient method (CUDA).",                                                      //
@@ -281,10 +281,10 @@ void bind_linalg_cuda(nb::module_ &m) {
         nb::arg("rows"), nb::arg("cols"),                                                                        //
         nb::arg("b").noconvert(), nb::arg("x").noconvert(),                                                      //
         nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
-  // m.def("pcg_cuda_csr_direct_ic", &cg_cuda_csr_direct<double, ic<double>>,
-  //       "Preconditioned Conjugate Gradient method (CUDA) with Incomplete Cholesky Preconditioner.",              //
-  //       nb::arg("outer_ptrs").noconvert(), nb::arg("inner_indices").noconvert(), nb::arg("values").noconvert(),  //
-  //       nb::arg("rows"), nb::arg("cols"),                                                                        //
-  //       nb::arg("b").noconvert(), nb::arg("x").noconvert(),                                                      //
-  //       nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
+  m.def("pcg_cuda_csr_direct_ic", &cg_cuda_csr_direct<double, ic<double>>,
+        "Preconditioned Conjugate Gradient method (CUDA) with Incomplete Cholesky Preconditioner.",              //
+        nb::arg("outer_ptrs").noconvert(), nb::arg("inner_indices").noconvert(), nb::arg("values").noconvert(),  //
+        nb::arg("rows"), nb::arg("cols"),                                                                        //
+        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                                                      //
+        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
 }
