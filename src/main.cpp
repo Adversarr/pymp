@@ -1,5 +1,6 @@
-#include "geometry.hpp"
 #include "checkings.hpp"
+#include "cholesky.hpp"
+#include "geometry.hpp"
 #include "linalg.hpp"
 
 bool is_cuda_available() {
@@ -24,6 +25,9 @@ NB_MODULE(libpymp, m) {
   auto linalg = m.def_submodule("linalg", "Linear algebra module, including matrix, vector, etc.");
   bind_linalg(linalg);
   bind_linalg_cuda(linalg);
+  
+  ////////// Cholmod //////////
+  bind_cholesky(linalg);
 
   ////////// CUDA //////////
   m.def("is_cuda_available", &is_cuda_available, "Check if CUDA is available.");

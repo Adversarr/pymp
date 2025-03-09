@@ -2,6 +2,7 @@ from pymp.linalg import cg, cg_cuda, pcg_diagonal, pcg_ainv, pcg_diagonal_cuda, 
 
 import numpy as np
 from scipy.sparse import csr_matrix
+from scipy.sparse.linalg import cg
 from timeit import Timer
 
 x = np.array([1,2,3], dtype=np.float32)

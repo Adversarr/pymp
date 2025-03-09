@@ -1,4 +1,4 @@
-from typing import Tuple, List, Union
+from typing import Any, Tuple, List, Union
 import libpymp
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -312,3 +312,49 @@ def pcg_cuda_csr_direct_ainv(
         max_iter=max_iter,
         verbose=verbose,
     )
+
+def ldlt(
+    A: csr_matrix
+) -> Any:
+    """
+    Compute the LDL^T decomposition of a symmetric positive definite matrix. (Eigen::SimplicialLDLT)
+
+    Returns
+    -------
+    Solver
+        The LDL^T decomposition.
+
+    Examples
+    --------
+    >>> A = csr_matrix(...)
+    >>> solver = ldlt(A)
+    >>> solver.solve(b, x) # Solve Ax = b where x and b are vectors
+    >>> solver.vsolve(b, x) # Solve A X = B where X and B are matrices
+    """
+    if A.dtype == np.float32:
+        return libpymp.linalg.eigen_simplicial_ldlt_float32(A)
+    elif A.dtype == np.float64:
+        return libpymp.linalg.eigen_simplicial_ldlt_float64(A)
+
+def llt(
+    A: csr_matrix
+) -> Any:
+    """
+    Compute the Cholesky decomposition of a symmetric positive definite matrix. (Eigen::SimplicialLLT)
+
+    Returns
+    -------
+    Solver
+        The Cholesky decomposition.
+
+    Examples
+    --------
+    >>> A = csr_matrix(...)
+    >>> solver = ldlt(A)
+    >>> solver.solve(b, x) # Solve Ax = b where x and b are vectors
+    >>> solver.vsolve(b, x) # Solve A X = B where X and B are matrices
+    """
+    if A.dtype == np.float32:
+        return libpymp.linalg.eigen_simplicial_llt_float32(A)
+    elif A.dtype == np.float64:
+        return libpymp.linalg.eigen_simplicial_llt_float64(A)
