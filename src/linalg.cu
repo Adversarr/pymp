@@ -70,8 +70,10 @@ cg_cuda(const Eigen::SparseMatrix<Flt, Eigen::RowMajor> &A, //
   sparse::iterative::iterative_solver_result<Flt> result;
   auto start = std::chrono::high_resolution_clock::now();
   if (verbose > 0) {
-    result = solver.apply(b_view, x_view, criteria, [](index_t iter, Flt norm) {
-      std::cout << "Iteration: " << iter << ", Norm: " << norm << std::endl;
+    result = solver.apply(b_view, x_view, criteria, [verbose](index_t iter, Flt norm) {
+      if (iter % verbose == 0) {
+        std::cout << "Iteration: " << iter << ", Norm: " << norm << std::endl;
+      }
     });
   } else {
     result = solver.apply(b_view, x_view, criteria);

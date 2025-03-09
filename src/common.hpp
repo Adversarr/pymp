@@ -14,6 +14,7 @@ namespace nb = ::nanobind;
 namespace mp = ::mathprim;
 
 namespace nbex {
+
 namespace internal {
 
 using nb_index_t = ssize_t;

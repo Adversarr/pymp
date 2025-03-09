@@ -1,4 +1,4 @@
-from pymp.linalg import *
+from pymp.linalg import cg, cg_cuda, pcg_diagonal, pcg_ainv, pcg_diagonal_cuda, pcg_ainv_cuda, ainv_content, grid_laplacian_nd_dbc
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -30,37 +30,40 @@ for method in [cg, cg_cuda, pcg_diagonal, pcg_ainv, pcg_diagonal_cuda, pcg_ainv_
 
 print(ainv_content(A))
 
-def laplace_2d(n) -> csr_matrix:
-    """
-    Construct the 2D Laplacian matrix of size n x n.
-    """
-    row_entry = []
-    col_entry = []
-    data_entry = []
-    for i in range(n):
-        for j in range(n):
-            row_entry.append(i*n + j)
-            col_entry.append(i*n + j)
-            data_entry.append(4)
-            if i > 0:
-                row_entry.append(i*n + j)
-                col_entry.append((i-1)*n + j)
-                data_entry.append(-1)
-            if i < n-1:
-                row_entry.append(i*n + j)
-                col_entry.append((i+1)*n + j)
-                data_entry.append(-1)
-            if j > 0:
-                row_entry.append(i*n + j)
-                col_entry.append(i*n + j-1)
-                data_entry.append(-1)
-            if j < n-1:
-                row_entry.append(i*n + j)
-                col_entry.append(i*n + j+1)
-                data_entry.append(-1)
-    res = csr_matrix((data_entry, (row_entry, col_entry)), shape=(n*n, n*n), dtype=np.float32)
-    res.sort_indices()
-    return res
+# def laplace_2d(n) -> csr_matrix:
+#     """
+#     Construct the 2D Laplacian matrix of size n x n.
+#     """
+#     row_entry = []
+#     col_entry = []
+#     data_entry = []
+#     for i in range(n):
+#         for j in range(n):
+#             row_entry.append(i*n + j)
+#             col_entry.append(i*n + j)
+#             data_entry.append(4)
+#             if i > 0:
+#                 row_entry.append(i*n + j)
+#                 col_entry.append((i-1)*n + j)
+#                 data_entry.append(-1)
+#             if i < n-1:
+#                 row_entry.append(i*n + j)
+#                 col_entry.append((i+1)*n + j)
+#                 data_entry.append(-1)
+#             if j > 0:
+#                 row_entry.append(i*n + j)
+#                 col_entry.append(i*n + j-1)
+#                 data_entry.append(-1)
+#             if j < n-1:
+#                 row_entry.append(i*n + j)
+#                 col_entry.append(i*n + j+1)
+#                 data_entry.append(-1)
+#     res = csr_matrix((data_entry, (row_entry, col_entry)), shape=(n*n, n*n), dtype=np.float32)
+#     res.sort_indices()
+#     return res
+
+def laplace_2d(n):
+    return grid_laplacian_nd_dbc([n, n], dtype=np.float32)
 
 n = 1024
 cnt = 3

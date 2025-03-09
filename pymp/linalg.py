@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List, Union
 import libpymp
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -134,3 +134,27 @@ def ainv_content(A: csr_matrix) -> csr_matrix:
         The content of the Approximated Inverse preconditioner.
     """
     return libpymp.linalg.ainv_content(A)
+
+
+def grid_laplacian_nd_dbc(
+    grids: Union[List[int], np.ndarray],
+    dtype=np.float32
+) -> csr_matrix:
+    """
+    Construct the Laplacian operator on n-dimensional grid with Dirichlet boundary conditions.
+
+    Returns
+    -------
+    csr_matrix
+        The Laplacian operator.
+    """
+
+    if isinstance(grids, np.ndarray):
+        grids = grids.tolist()
+
+    if dtype == np.float32:
+        return libpymp.linalg.grid_laplacian_nd_dbc_float32(grids)
+    elif dtype == np.float64:
+        return libpymp.linalg.grid_laplacian_nd_dbc_float64(grids)
+    else:
+        raise ValueError("dtype must be np.float32 or np.float64")
