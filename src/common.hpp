@@ -10,6 +10,7 @@
 
 #include "mathprim/core/view.hpp"
 
+#define TOSTR(x) #x
 namespace nb = ::nanobind;
 namespace mp = ::mathprim;
 

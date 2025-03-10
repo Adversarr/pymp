@@ -6,8 +6,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Install mathprim here.
 list(APPEND CMAKE_PREFIX_PATH 
-    "${CMAKE_CURRENT_SOURCE_DIR}/install/")
-
+    "${CMAKE_CURRENT_LIST_DIR}/install/")
+message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 project(pymp)
 
 find_package(Python COMPONENTS Interpreter Development REQUIRED)

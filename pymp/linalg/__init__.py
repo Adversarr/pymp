@@ -1,4 +1,4 @@
-from typing import Any, Tuple, List, Union
+from typing import Any, Callable, Tuple, List, Union
 import libpymp
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -6,13 +6,14 @@ from torch import Tensor
 import torch
 
 
-def cg(
+def pcg(
     A: csr_matrix,
     b: np.ndarray,
     x: np.ndarray,
     rtol: float = 1e-4,
     max_iter: int = 0,
     verbose: int = 0,
+    callback: Union[None, Callable] = None,
 ) -> Tuple[int, float]:
     """
     Solve the linear system Ax = b using the conjugate gradient method.
@@ -24,7 +25,11 @@ def cg(
     float
         The time taken to solve the linear system.
     """
-    return libpymp.linalg.cg(A, b, x, rtol, max_iter, verbose)
+    if callback:
+        return libpymp.linalg.pcg_cb_no(A, b, x, rtol, max_iter, callback)
+    else:
+        return libpymp.linalg.pcg_no(A, b, x, rtol, max_iter, verbose)
+
 
 def pcg_diagonal(
     A: csr_matrix,
@@ -33,6 +38,7 @@ def pcg_diagonal(
     rtol: float = 1e-4,
     max_iter: int = 0,
     verbose: int = 0,
+    callback: Union[None, Callable] = None,
 ) -> Tuple[int, float]:
     """
     Solve the linear system Ax = b using the conjugate gradient method with diagonal preconditioner.
@@ -44,7 +50,10 @@ def pcg_diagonal(
     float
         The time taken to solve the linear system.
     """
-    return libpymp.linalg.pcg_diagonal(A, b, x, rtol, max_iter, verbose)
+    if callback:
+        return libpymp.linalg.pcg_cb_diagonal(A, b, x, rtol, max_iter, callback)
+    else:
+        return libpymp.linalg.pcg_diagonal(A, b, x, rtol, max_iter, verbose)
 
 def pcg_ainv(
     A: csr_matrix,
@@ -53,6 +62,7 @@ def pcg_ainv(
     rtol: float = 1e-4,
     max_iter: int = 0,
     verbose: int = 0,
+    callback: Union[None, Callable] = None,
 ) -> Tuple[int, float]:
     """
     Solve the linear system Ax = b using the conjugate gradient method with Approximated Inverse preconditioner.
@@ -64,9 +74,35 @@ def pcg_ainv(
     float
         The time taken to solve the linear system.
     """
-    return libpymp.linalg.pcg_ainv(A, b, x, rtol, max_iter, verbose)
+    if callback:
+        return libpymp.linalg.pcg_cb_ainv(A, b, x, rtol, max_iter, callback)
+    else:
+        return libpymp.linalg.pcg_ainv(A, b, x, rtol, max_iter, verbose)
 
-def cg_cuda(
+
+def pcg_with_ext_spai(
+    A: csr_matrix,
+    b: np.ndarray,
+    x: np.ndarray,
+    ainv: csr_matrix,
+    epsilon: float,
+    rtol: float = 1e-4,
+    max_iter: int = 0,
+    verbose: int = 0,
+) -> Tuple[int, float]:
+    """
+    Solve the linear system Ax = b using the conjugate gradient method with External SPAI preconditioner.
+
+    Returns
+    -------
+    int
+        The number of iterations.
+    float
+        The time taken to solve the linear system.
+    """
+    return libpymp.linalg.pcg_with_ext_spai(A, b, x, ainv, epsilon, rtol, max_iter, verbose)
+
+def pcg_cuda(
     A: csr_matrix,
     b: np.ndarray,
     x: np.ndarray,
@@ -84,7 +120,7 @@ def cg_cuda(
     float
         The time taken to solve the linear system.
     """
-    return libpymp.linalg.cg_cuda(A, b, x, rtol, max_iter, verbose)
+    return libpymp.linalg.pcg_no_cuda(A, b, x, rtol, max_iter, verbose)
 
 def pcg_diagonal_cuda(
     A: csr_matrix,
@@ -186,7 +222,7 @@ def cg_cuda_csr_direct(
     assert outer_ptrs.dtype == inner_indices.dtype == torch.int32
     assert values.dtype == b.dtype == x.dtype
     assert b.is_contiguous() and x.is_contiguous()
-    return libpymp.linalg.cg_cuda_csr_direct(
+    return libpymp.linalg.pcg_no_cuda_direct(
         outer_ptrs=outer_ptrs,
         inner_indices=inner_indices,
         values=values,
@@ -224,7 +260,7 @@ def pcg_cuda_csr_direct_diagonal(
     assert outer_ptrs.dtype == inner_indices.dtype == torch.int32
     assert values.dtype == b.dtype == x.dtype
     assert b.is_contiguous() and x.is_contiguous()
-    return libpymp.linalg.pcg_cuda_csr_direct_diagonal(
+    return libpymp.linalg.pcg_diagonal_cuda_direct(
         outer_ptrs=outer_ptrs,
         inner_indices=inner_indices,
         values=values,
@@ -262,7 +298,7 @@ def pcg_cuda_csr_direct_ic(
     assert outer_ptrs.dtype == inner_indices.dtype == torch.int32
     assert values.dtype == b.dtype == x.dtype
     assert b.is_contiguous() and x.is_contiguous()
-    return libpymp.linalg.pcg_cuda_csr_direct_ic(
+    return libpymp.linalg.pcg_ic_cuda_direct(
         outer_ptrs=outer_ptrs,
         inner_indices=inner_indices,
         values=values,
@@ -300,7 +336,7 @@ def pcg_cuda_csr_direct_ainv(
     assert outer_ptrs.dtype == inner_indices.dtype == torch.int32
     assert values.dtype == b.dtype == x.dtype
     assert b.is_contiguous() and x.is_contiguous()
-    return libpymp.linalg.pcg_cuda_csr_direct_ainv(
+    return libpymp.linalg.pcg_ainv_cuda_direct(
         outer_ptrs=outer_ptrs,
         inner_indices=inner_indices,
         values=values,

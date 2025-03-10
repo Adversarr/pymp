@@ -180,111 +180,40 @@ using ic =
     sparse::iterative::cusparse_ichol<Scalar, device::cuda,
                                       mathprim::sparse::sparse_format::csr>;
 
+template <typename Scalar>
+using no = sparse::iterative::none_preconditioner<Scalar, device::cuda>;
+
+#define BIND_TRANSFERING_GPU_TYPE(flt, preconditioning)                                        \
+  m.def(TOSTR(pcg_##preconditioning##_cuda),                                   \
+        &cg_cuda<flt, preconditioning<flt>>,                                   \
+        "Preconditioned CG on GPU (cpu->gpu->cpu) (with " #preconditioning     \
+        " precond.)",                                                          \
+        nb::arg("A").noconvert(), nb::arg("b").noconvert(),                    \
+        nb::arg("x").noconvert(), nb::arg("rtol") = 1e-4f,                     \
+        nb::arg("max_iter") = 0, nb::arg("verbose") = 0)
+
+#define BIND_DIRECT(flt, preconditioning)                                      \
+  m.def(TOSTR(pcg_##preconditioning##_cuda_direct),                            \
+        &cg_cuda_csr_direct<flt, preconditioning<flt>>,                        \
+        "Preconditioned CG on GPU (direct) (with " #preconditioning            \
+        " precond.)",                                                          \
+        nb::arg("outer_ptrs").noconvert(),                                     \
+        nb::arg("inner_indices").noconvert(), nb::arg("values").noconvert(),   \
+        nb::arg("rows"), nb::arg("cols"), nb::arg("b").noconvert(),            \
+        nb::arg("x").noconvert(), nb::arg("rtol") = 1e-4f,                     \
+        nb::arg("max_iter") = 0, nb::arg("verbose") = 0)
+
+#define BIND_ALL(flt)                                                          \
+  BIND_TRANSFERING_GPU_TYPE(flt, no);                                          \
+  BIND_TRANSFERING_GPU_TYPE(flt, diagonal);                                    \
+  BIND_TRANSFERING_GPU_TYPE(flt, ainv);                                        \
+  BIND_TRANSFERING_GPU_TYPE(flt, ic);                                          \
+  BIND_DIRECT(flt, no);                                                        \
+  BIND_DIRECT(flt, diagonal);                                                  \
+  BIND_DIRECT(flt, ainv);                                                      \
+  BIND_DIRECT(flt, ic)
+
 void bind_linalg_cuda(nb::module_ &m) {
-  m.def("cg_cuda", &cg_cuda<float>,
-        "Preconditioned Conjugate Gradient method (CUDA).", //
-        nb::arg("A"),                                       //
-        nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
-        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
-        nb::arg("verbose") = 0);
-
-  m.def("pcg_diagonal_cuda", &cg_cuda<float, diagonal<float>>,
-        "Preconditioned Conjugate Gradient method on GPU. (Diagonal "
-        "Preconditioner)",                                  //
-        nb::arg("A"),                                       //
-        nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
-        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
-        nb::arg("verbose") = 0);
-  m.def("pcg_ainv_cuda", &cg_cuda<float, ainv<float>>,
-        "Preconditioned Conjugate Gradient method on GPU. (Approx Inverse "
-        "Preconditioner)",                                  //
-        nb::arg("A"),                                       //
-        nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
-        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
-        nb::arg("verbose") = 0);
-  m.def("cg_cuda", &cg_cuda<double>,
-        "Preconditioned Conjugate Gradient method (CUDA).", //
-        nb::arg("A"),                                       //
-        nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
-        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
-        nb::arg("verbose") = 0);
-  m.def("pcg_ic", &cg_cuda<float, ic<float>>,
-        "Preconditioned Conjugate Gradient method on GPU. (Incomplete Cholesky "
-        "Preconditioner)",                                  //
-        nb::arg("A"),                                       //
-        nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
-        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
-        nb::arg("verbose") = 0);
-  m.def("pcg_diagonal_cuda", &cg_cuda<double, diagonal<double>>,
-        "Preconditioned Conjugate Gradient method on GPU. (Diagonal "
-        "Preconditioner)",                                  //
-        nb::arg("A"),                                       //
-        nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
-        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
-        nb::arg("verbose") = 0);
-  m.def("pcg_ainv_cuda", &cg_cuda<double, ainv<double>>,
-        "Preconditioned Conjugate Gradient method on GPU. (Approx Inverse "
-        "Preconditioner)",                                  //
-        nb::arg("A"),                                       //
-        nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
-        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
-        nb::arg("verbose") = 0);
-  m.def("pcg_ic", &cg_cuda<double, ic<double>>,
-        "Preconditioned Conjugate Gradient method on GPU. (Incomplete Cholesky "
-        "Preconditioner)",                                  //
-        nb::arg("A"),                                       //
-        nb::arg("b").noconvert(), nb::arg("x").noconvert(), //
-        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0,
-        nb::arg("verbose") = 0);
-
-  m.def("cg_cuda_csr_direct", &cg_cuda_csr_direct<float>,
-        "Preconditioned Conjugate Gradient method (CUDA).",                                                      //
-        nb::arg("outer_ptrs").noconvert(), nb::arg("inner_indices").noconvert(), nb::arg("values").noconvert(),  //
-        nb::arg("rows"), nb::arg("cols"),                                                                        //
-        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                                                      //
-        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
-  m.def("pcg_cuda_csr_direct_diagonal", &cg_cuda_csr_direct<float, diagonal<float>>,
-        "Preconditioned Conjugate Gradient method (CUDA) with Diagonal Preconditioner.",                         //
-        nb::arg("outer_ptrs").noconvert(), nb::arg("inner_indices").noconvert(), nb::arg("values").noconvert(),  //
-        nb::arg("rows"), nb::arg("cols"),                                                                        //
-        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                                                      //
-        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
-  m.def("pcg_cuda_csr_direct_ic", &cg_cuda_csr_direct<float, ic<float>>,
-        "Preconditioned Conjugate Gradient method (CUDA) with Incomplete Cholesky Preconditioner.",              //
-        nb::arg("outer_ptrs").noconvert(), nb::arg("inner_indices").noconvert(), nb::arg("values").noconvert(),  //
-        nb::arg("rows"), nb::arg("cols"),                                                                        //
-        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                                                      //
-        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
-  m.def("pcg_cuda_csr_direct_ainv", &cg_cuda_csr_direct<float, ainv<float>>,
-        "Preconditioned Conjugate Gradient method (CUDA) with Approximate Inverse Preconditioner.",              //
-        nb::arg("outer_ptrs").noconvert(), nb::arg("inner_indices").noconvert(), nb::arg("values").noconvert(),  //
-        nb::arg("rows"), nb::arg("cols"),                                                                        //
-        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                                                      //
-        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
-  
-
-  m.def("cg_cuda_csr_direct", &cg_cuda_csr_direct<double>,
-        "Preconditioned Conjugate Gradient method (CUDA).",                                                      //
-        nb::arg("outer_ptrs").noconvert(), nb::arg("inner_indices").noconvert(), nb::arg("values").noconvert(),  //
-        nb::arg("rows"), nb::arg("cols"),                                                                        //
-        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                                                      //
-        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
-  m.def("pcg_cuda_csr_direct_diagonal", &cg_cuda_csr_direct<double, diagonal<double>>,
-        "Preconditioned Conjugate Gradient method (CUDA) with Diagonal Preconditioner.",                         //
-        nb::arg("outer_ptrs").noconvert(), nb::arg("inner_indices").noconvert(), nb::arg("values").noconvert(),  //
-        nb::arg("rows"), nb::arg("cols"),                                                                        //
-        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                                                      //
-        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
-  m.def("pcg_cuda_csr_direct_ainv", &cg_cuda_csr_direct<double, ainv<double>>,
-        "Preconditioned Conjugate Gradient method (CUDA) with Approximate Inverse Preconditioner.",              //
-        nb::arg("outer_ptrs").noconvert(), nb::arg("inner_indices").noconvert(), nb::arg("values").noconvert(),  //
-        nb::arg("rows"), nb::arg("cols"),                                                                        //
-        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                                                      //
-        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
-  m.def("pcg_cuda_csr_direct_ic", &cg_cuda_csr_direct<double, ic<double>>,
-        "Preconditioned Conjugate Gradient method (CUDA) with Incomplete Cholesky Preconditioner.",              //
-        nb::arg("outer_ptrs").noconvert(), nb::arg("inner_indices").noconvert(), nb::arg("values").noconvert(),  //
-        nb::arg("rows"), nb::arg("cols"),                                                                        //
-        nb::arg("b").noconvert(), nb::arg("x").noconvert(),                                                      //
-        nb::arg("rtol") = 1e-4f, nb::arg("max_iter") = 0, nb::arg("verbose") = 0);
+  BIND_ALL(float);
+  BIND_ALL(double);
 }
