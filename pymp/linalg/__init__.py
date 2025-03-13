@@ -102,6 +102,29 @@ def pcg_with_ext_spai(
     """
     return libpymp.linalg.pcg_with_ext_spai(A, b, x, ainv, epsilon, rtol, max_iter, verbose)
 
+
+def pcg_with_ext_spai_cuda(
+    A: csr_matrix,
+    b: np.ndarray,
+    x: np.ndarray,
+    ainv: csr_matrix,
+    epsilon: float,
+    rtol: float = 1e-4,
+    max_iter: int = 0,
+    verbose: int = 0,
+) -> Tuple[int, float]:
+    """
+    Solve the linear system Ax = b using the conjugate gradient method with External SPAI preconditioner.
+
+    Returns
+    -------
+    int
+        The number of iterations.
+    float
+        The time taken to solve the linear system.
+    """
+    return libpymp.linalg.pcg_with_ext_spai_cuda(A, b, x, ainv, epsilon, rtol, max_iter, verbose)
+
 def pcg_cuda(
     A: csr_matrix,
     b: np.ndarray,
@@ -348,6 +371,54 @@ def pcg_cuda_csr_direct_ainv(
         max_iter=max_iter,
         verbose=verbose,
     )
+
+
+def pcg_cuda_csr_direct_with_ext_spai(
+    outer_ptrs: Tensor,
+    inner_indices: Tensor,
+    values: Tensor,
+    rows: int,
+    cols: int,
+    ainv_outer_ptrs: Tensor,
+    ainv_inner_indices: Tensor,
+    ainv_values: Tensor,
+    epsilon: float,
+    b: Tensor,
+    x: Tensor,
+    rtol: float = 1e-4,
+    max_iter: int = 0,
+    verbose: int = 0,
+) -> Tuple[int, float]:
+    """
+    Solve the linear system Ax = b using the conjugate gradient method with Approximated Inverse preconditioner on GPU.
+    
+    Returns
+    -------
+    int
+        The number of iterations.
+    float
+        The time taken to solve the linear system.
+    """
+    assert outer_ptrs.dtype == inner_indices.dtype == torch.int32
+    assert values.dtype == b.dtype == x.dtype
+    assert b.is_contiguous() and x.is_contiguous()
+    return libpymp.linalg.pcg_with_ext_spai_cuda_direct(
+        outer_ptrs=outer_ptrs,
+        inner_indices=inner_indices,
+        values=values,
+        rows=rows,
+        cols=cols,
+        ainv_outer_ptrs=ainv_outer_ptrs,
+        ainv_inner_indices=ainv_inner_indices,
+        ainv_values=ainv_values,
+        epsilon=epsilon,
+        b=b,
+        x=x,
+        rtol=rtol,
+        max_iter=max_iter,
+        verbose=verbose,
+    )
+
 
 def ldlt(
     A: csr_matrix

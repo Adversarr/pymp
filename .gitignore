@@ -3,7 +3,7 @@ mathprim
 install
 _build
 poetry.lock
-
+uv.lock
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

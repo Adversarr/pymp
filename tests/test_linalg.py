@@ -1,4 +1,4 @@
-from pymp.linalg import pcg, pcg_cuda, pcg_diagonal, pcg_ainv, pcg_diagonal_cuda, pcg_ainv_cuda, ainv, grid_laplacian_nd_dbc, pcg_with_ext_spai
+from pymp.linalg import pcg, pcg_cuda, pcg_diagonal, pcg_ainv, pcg_diagonal_cuda, pcg_ainv_cuda, ainv, grid_laplacian_nd_dbc, pcg_with_ext_spai, pcg_with_ext_spai_cuda
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -34,8 +34,12 @@ for method in [pcg, pcg_cuda, pcg_diagonal, pcg_ainv, pcg_diagonal_cuda, pcg_ain
     print(A @ x - b)
 
 print(ainv(A))
+print("=== pcg_with_ext_spai ===")
 x = np.array([1,2,3], dtype=np.float32)
 print(pcg_with_ext_spai(A, b, x, ainv(A), 1e-6, 1e-4, 20, 1))
+print("=== pcg_with_ext_spai_cuda ===")
+x = np.array([1,2,3], dtype=np.float32)
+print(pcg_with_ext_spai_cuda(A, b, x, ainv(A), 1e-6, 1e-4, 20, 1))
 
 def laplace_2d(n):
     return grid_laplacian_nd_dbc([n, n], dtype=np.float32)

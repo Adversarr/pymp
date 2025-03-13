@@ -1,10 +1,13 @@
 import numpy as np
+from scipy.sparse import csr_matrix
 from pymp.linalg import (
     cg_cuda_csr_direct,
     pcg_cuda_csr_direct_diagonal,
     pcg_cuda_csr_direct_ic,
     pcg_cuda_csr_direct_ainv,
+    pcg_cuda_csr_direct_with_ext_spai,
     grid_laplacian_nd_dbc,
+    ainv,
 )
 import torch
 from timeit import Timer
@@ -37,6 +40,34 @@ for m in all_methods:
       max_iter=100,
       verbose=1
     ))
+#### pcg_cuda_csr_direct_with_ext_spai
+mat = csr_matrix(([3, 1, 1, 3, 1, 1, 3], ([0, 0, 1, 1, 1, 2, 2], [0, 1, 0, 1, 2, 1, 2])), shape=(3, 3), dtype=np.float32)
+ai = ainv(mat)
+print(ai)
+ai_rowptrs = torch.tensor(ai.indptr, dtype=torch.int32, device=torch.device('cuda'))
+ai_colinds = torch.tensor(ai.indices, dtype=torch.int32, device=torch.device('cuda'))
+ai_values = torch.tensor(ai.data, dtype=dtype, device=torch.device('cuda'))
+# ai_torch = torch.sparse_csr_tensor(
+#     torch.tensor(ai.data, dtype=dtype, device=torch.device("cuda")),
+#     torch.tensor(ai.indices, dtype=torch.int32, device=torch.device("cuda")),
+#     torch.tensor(ai.indptr, dtype=torch.int32, device=torch.device("cuda")),
+#     mat.shape,
+# )
+x = torch.zeros(3, dtype=dtype, device=torch.device('cuda'))
+b = torch.tensor([1, 2, 3], dtype=dtype, device=torch.device('cuda'))
+pcg_cuda_csr_direct_with_ext_spai(
+    outer_ptrs=outer_ptrs,
+    inner_indices=inner_ptrs,
+    values=values,
+    rows=3, cols=3,
+    ainv_outer_ptrs=ai_rowptrs,
+    ainv_inner_indices=ai_colinds,
+    ainv_values=ai_values, epsilon=0,
+    b=b,
+    x=x,
+    max_iter=100,
+    verbose=1
+)
 
 N = 1024
 laplacian = grid_laplacian_nd_dbc([N, N])
